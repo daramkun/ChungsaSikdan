@@ -35,7 +35,7 @@ public class ChungsaListActivity extends Activity implements AdapterView.OnItemC
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    chungsaList = Chungsa.getChungsaList();
+                    chungsaList = Chungsa.getChungsaList(self);
                     chungsaNames = new ArrayList<String>();
                     for (Chungsa chungsa : chungsaList) {
                         chungsaNames.add(chungsa.getName());

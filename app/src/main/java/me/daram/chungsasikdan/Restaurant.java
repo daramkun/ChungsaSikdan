@@ -1,5 +1,7 @@
 package me.daram.chungsasikdan;
 
+import android.content.Context;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,13 +16,13 @@ import java.util.regex.Pattern;
  */
 
 public final class Restaurant {
-    public static List<Restaurant> getRestaurantList (String chungsaCode ) throws IOException {
+    public static List<Restaurant> getRestaurantList (Context context, String chungsaCode) throws IOException {
         Pattern chungsaPattern = Pattern.compile("[\t ]*<option value=\"([0-9]+)\" label=\"(.*)\"[ ]*>(.*)</option>");
-        URL url = new URL("http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do?searchCode1=GBD&selGbdVal=" + chungsaCode);
+        //URL url = new URL("http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do?searchCode1=GBD&selGbdVal=" + chungsaCode);
 
         List<Restaurant> retList = new ArrayList<Restaurant>();
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+        BufferedReader in = new BufferedReader (PageGetter.getPage(context, "http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do?searchCode1=GBD&selGbdVal=" + chungsaCode));//new BufferedReader(new InputStreamReader(url.openStream()));
         String str;
         while ((str = in.readLine()) != null) {
             Matcher matcher = chungsaPattern.matcher(str);
@@ -36,31 +38,36 @@ public final class Restaurant {
     public String getName () { return name; }
     public int getCode () { return code; }
     public String getChungsaCode () { return chungsaCode; }
-    public String getMenuURL () throws IOException {
-        Pattern chungsaPattern = Pattern.compile("[\t ]*<img src='(\\/chungsa\\/cmm\\/fms\\/getImage.do[a-zA-Z0-9_&=?.;]+)'[ ]+width=\"([0-9]+)px\"[ ]+height=\"([0-9]+)px\"[ ]+alt=\"(.*)\"[ ]+\\/>");
-        URL url = new URL("http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do?searchCode1=REST&selGbdVal=" + chungsaCode + "&selRestVal=" + code);
+    public String getMenuURL (Context context) throws IOException {
+        if (urlCache != null)
+            return urlCache;
+        else {
+            Pattern chungsaPattern = Pattern.compile("[\t ]*<img src='(\\/chungsa\\/cmm\\/fms\\/getImage.do[a-zA-Z0-9_&=?.;]+)'[ ]+width=\"([0-9]+)px\"[ ]+height=\"([0-9]+)px\"[ ]+alt=\"(.*)\"[ ]+\\/>");
+            //URL url = new URL("http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do?searchCode1=REST&selGbdVal=" + chungsaCode + "&selRestVal=" + code);
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-        String str;
-        while ((str = in.readLine()) != null)
-        {
-            Matcher matcher = chungsaPattern.matcher(str);
-            if ( !matcher.matches () )
-                continue;
-            return "http://www.chungsa.go.kr" + matcher.group(1);
+            BufferedReader in = new BufferedReader(PageGetter.getPage(context, "http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do?searchCode1=REST&selGbdVal=" + chungsaCode + "&selRestVal=" + code)); //new BufferedReader(new InputStreamReader(url.openStream()));
+            String str;
+            while ((str = in.readLine()) != null) {
+                Matcher matcher = chungsaPattern.matcher(str);
+                if (!matcher.matches())
+                    continue;
+                return urlCache = ("http://www.chungsa.go.kr" + matcher.group(1));
+            }
+            in.close();
+
+            return null;
         }
-        in.close();
-
-        return null;
     }
 
     public Restaurant ( String name, int code, String chungsaCode ) {
         this.name = name.trim ();
         this.code = code;
         this.chungsaCode = chungsaCode.trim ();
+        this.urlCache = null;
     }
 
     private String name;
     private int code;
     private String chungsaCode;
+    private String urlCache;
 }

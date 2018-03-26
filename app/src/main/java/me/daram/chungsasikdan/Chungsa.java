@@ -1,5 +1,7 @@
 package me.daram.chungsasikdan;
 
+import android.content.Context;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,13 +16,13 @@ import java.util.regex.Pattern;
  */
 
 public final class Chungsa {
-    public static List<Chungsa> getChungsaList () throws IOException {
+    public static List<Chungsa> getChungsaList (Context context) throws IOException {
         Pattern chungsaPattern = Pattern.compile("[\t ]*<option value=\"(BD[0-9]+)\" label=\"(.*)\"[ ]*>(.*)</option>");
-        URL url = new URL("http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do");
+        //URL url = new URL("http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do");
 
         List<Chungsa> retList = new ArrayList<Chungsa>();
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+        BufferedReader in = new BufferedReader (PageGetter.getPage(context, "http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do"));//new BufferedReader(new InputStreamReader(url.openStream()));
         String str;
         while ((str = in.readLine()) != null) {
             Matcher matcher = chungsaPattern.matcher(str);

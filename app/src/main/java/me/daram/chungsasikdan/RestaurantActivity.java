@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.util.Config;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,6 +22,9 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.net.URL;
@@ -67,7 +71,7 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    restaurantList = Restaurant.getRestaurantList(chungsaCode);
+                    restaurantList = Restaurant.getRestaurantList(self, chungsaCode);
                     restaurantNames = new ArrayList<String>();
                     for (Restaurant restaurant : restaurantList) {
                         restaurantNames.add(restaurant.getName());
@@ -96,18 +100,30 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
 
     private void getRestaurantMenuImageAsync (final Restaurant restaurant) {
         final Activity self = this;
+        final PhotoView menuImageView = findViewById(R.id.restaurant_menu_photoview);
         @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void> () {
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    URL menuUrl = new URL(restaurant.getMenuURL());
-                    final Bitmap menuImage = BitmapFactory.decodeStream(menuUrl.openStream());
+                    //URL menuUrl = new URL(restaurant.getMenuURL());
+                    //final Bitmap menuImage = BitmapFactory.decodeStream(menuUrl.openStream());
 
+                    //runOnUiThread(new Runnable(){
+                    //    @Override
+                    //    public void run() {
+                    //        PhotoView menuImageView = findViewById(R.id.restaurant_menu_photoview);
+                    //        menuImageView.setImageBitmap(menuImage);
+                    //    }
+                    //});
+                    final String url = restaurant.getMenuURL(self);
                     runOnUiThread(new Runnable(){
                         @Override
                         public void run() {
-                            PhotoView menuImageView = findViewById(R.id.restaurant_menu_photoview);
-                            menuImageView.setImageBitmap(menuImage);
+                            Picasso.get()
+                                    .load(url)
+                                    //.networkPolicy(NetworkPolicy.OFFLINE)
+                                    .error(R.drawable.no_image)
+                                    .into(menuImageView);
                         }
                     });
                 } catch (IOException e) {
