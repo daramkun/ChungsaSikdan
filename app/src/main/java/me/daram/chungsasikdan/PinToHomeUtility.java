@@ -1,9 +1,11 @@
 package me.daram.chungsasikdan;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
@@ -17,6 +19,11 @@ import android.support.annotation.RequiresApi;
 public final class PinToHomeUtility {
     public static boolean pinToHome (Context context, String id, Intent intent,
                                      CharSequence name, CharSequence shortName, int icon) {
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             return pinToHomeRegacy (context, id, intent, name, shortName, icon);
         } else {
@@ -26,8 +33,9 @@ public final class PinToHomeUtility {
 
     private static boolean pinToHomeRegacy (Context context, String id, Intent intent,
                                             CharSequence name, CharSequence shortName, int icon) {
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            if (!checkShortcutPermission(context))
+                return false;
 
         Intent shortcutAddIntent = new Intent();
         shortcutAddIntent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
@@ -47,6 +55,9 @@ public final class PinToHomeUtility {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private static boolean pinToHomeOreo (Context context, String id, Intent intent,
                                           CharSequence name, CharSequence shortName, int icon) {
+        if (!checkShortcutPermission(context))
+            return false;
+
         ShortcutManager shortcutManager = context.getSystemService(ShortcutManager.class);
         if(!shortcutManager.isRequestPinShortcutSupported())
             return false;
@@ -70,5 +81,10 @@ public final class PinToHomeUtility {
         startMain.addCategory(Intent.CATEGORY_HOME);
         startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(startMain);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private static boolean checkShortcutPermission (Context context) {
+        return context.checkSelfPermission(Manifest.permission.INSTALL_SHORTCUT) == PackageManager.PERMISSION_GRANTED;
     }
 }
