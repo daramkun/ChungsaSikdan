@@ -37,8 +37,8 @@ public final class Chungsa {
     public String getCode () { return code; }
 
     public Chungsa ( String name, String code ) {
-        this.name = name;
-        this.code = code;
+        this.name = name.trim ();
+        this.code = code.trim ();
     }
 
     private String name, code;

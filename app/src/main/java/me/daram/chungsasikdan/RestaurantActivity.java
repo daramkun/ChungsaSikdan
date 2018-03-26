@@ -2,11 +2,15 @@ package me.daram.chungsasikdan;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
 
@@ -43,9 +48,17 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
         restaurantSpinner.setOnItemSelectedListener(this);
 
         this.setTitle(chungsaName);
+        this.getActionBar().setIcon(R.drawable.pinned_shortcut_icon);
         getRestaurantListAsync();
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu (Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.restaurant_menu, menu);
+        return true;
     }
 
     private void getRestaurantListAsync() {
@@ -123,9 +136,32 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
                 //NavUtils.navigateUpFromSameTask(this);
                 this.finish();
                 break;
+
+            case R.id.pin_to_home:
+                {
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.setClass(this, RestaurantActivity.class);
+                    intent.putExtra("chungsa_name", getTitle());
+                    intent.putExtra("chungsa_code", chungsaCode);
+                    if(!PinToHomeUtility.pinToHome(this, "chungsasikdan_" + getTitle (), intent,
+                            getTitle(), getChungsaShortName(), R.drawable.pinned_shortcut_icon)) {
+                        Toast.makeText(this, R.string.pin_to_home_error, Toast.LENGTH_SHORT).show ();
+                    }
+                }
+                break;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private String getChungsaShortName () {
+        String title = String.valueOf(getTitle ());
+        if (title.contains("세종"))
+            return "세종청사";
+        if (title.length () <= 4)
+            return title;
+        return title.substring(0, 4);
     }
 }

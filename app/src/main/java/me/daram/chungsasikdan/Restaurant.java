@@ -55,9 +55,9 @@ public final class Restaurant {
     }
 
     public Restaurant ( String name, int code, String chungsaCode ) {
-        this.name = name;
+        this.name = name.trim ();
         this.code = code;
-        this.chungsaCode = chungsaCode;
+        this.chungsaCode = chungsaCode.trim ();
     }
 
     private String name;
