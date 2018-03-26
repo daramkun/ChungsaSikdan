@@ -17,7 +17,7 @@ import android.support.annotation.RequiresApi;
 public final class PinToHomeUtility {
     public static boolean pinToHome (Context context, String id, Intent intent,
                                      CharSequence name, CharSequence shortName, int icon) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             return pinToHomeRegacy (context, id, intent, name, shortName, icon);
         } else {
             return pinToHomeOreo ( context, id, intent, name, shortName, icon);
