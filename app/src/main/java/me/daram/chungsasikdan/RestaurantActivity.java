@@ -1,10 +1,12 @@
 package me.daram.chungsasikdan;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -37,15 +39,20 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
 
         String chungsaName = getIntent().getStringExtra("chungsa_name");
         chungsaCode = getIntent().getStringExtra("chungsa_code");
+        boolean startFromList = getIntent().getBooleanExtra("start_from_list", false);
 
         Spinner restaurantSpinner = findViewById(R.id.restaurant_spinner);
         restaurantSpinner.setOnItemSelectedListener(this);
 
         this.setTitle(chungsaName);
-        this.getActionBar().setIcon(R.drawable.pinned_shortcut_icon);
-        getRestaurantListAsync();
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = this.getActionBar();
+        if (actionBar != null) {
+            actionBar.setIcon(R.drawable.pinned_shortcut_icon);
+            actionBar.setDisplayHomeAsUpEnabled(startFromList);
+        }
+
+        getRestaurantListAsync();
     }
 
     @Override
@@ -149,6 +156,7 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
                     intent.setClass(this, RestaurantActivity.class);
                     intent.putExtra("chungsa_name", getTitle());
                     intent.putExtra("chungsa_code", chungsaCode);
+                    intent.putExtra("start_from_list", false);
                     if(!PinToHomeUtility.pinToHome(this, "chungsasikdan_" + getTitle (), intent,
                             getTitle(), getChungsaShortName(), R.drawable.pinned_shortcut_icon)) {
                         Toast.makeText(this, R.string.pin_to_home_error, Toast.LENGTH_SHORT).show ();

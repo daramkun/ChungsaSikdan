@@ -78,6 +78,7 @@ public class ChungsaListActivity extends Activity implements AdapterView.OnItemC
         Intent intent = new Intent(this, RestaurantActivity.class);
         intent.putExtra("chungsa_name", chungsa.getName());
         intent.putExtra("chungsa_code", chungsa.getCode());
+        intent.putExtra("start_from_list", true);
         startActivity(intent);
     }
 
