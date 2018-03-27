@@ -3,31 +3,21 @@ package me.daram.chungsasikdan;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ShortcutManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
-import android.util.Config;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +62,7 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
             protected Void doInBackground(Void... voids) {
                 try {
                     restaurantList = Restaurant.getRestaurantList(self, chungsaCode);
-                    restaurantNames = new ArrayList<String>();
+                    restaurantNames = new ArrayList<>();
                     for (Restaurant restaurant : restaurantList) {
                         restaurantNames.add(restaurant.getName());
                     }
@@ -82,7 +72,7 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
                         public void run() {
                             Spinner restaurantSpinner = findViewById(R.id.restaurant_spinner);
 
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(self,
+                            ArrayAdapter<String> adapter = new ArrayAdapter<>(self,
                                     android.R.layout.simple_list_item_1, restaurantNames);
                             restaurantSpinner.setAdapter(adapter);
 

@@ -4,8 +4,6 @@ import android.content.Context;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -20,7 +18,7 @@ public final class Restaurant {
         Pattern chungsaPattern = Pattern.compile("[\t ]*<option value=\"([0-9]+)\" label=\"(.*)\"[ ]*>(.*)</option>");
         //URL url = new URL("http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do?searchCode1=GBD&selGbdVal=" + chungsaCode);
 
-        List<Restaurant> retList = new ArrayList<Restaurant>();
+        List<Restaurant> retList = new ArrayList<>();
 
         BufferedReader in = new BufferedReader (PageGetter.getPage(context, "http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do?searchCode1=GBD&selGbdVal=" + chungsaCode));//new BufferedReader(new InputStreamReader(url.openStream()));
         String str;

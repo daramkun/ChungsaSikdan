@@ -1,7 +1,6 @@
 package me.daram.chungsasikdan;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -25,14 +24,14 @@ public final class PinToHomeUtility {
                 | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return pinToHomeRegacy (context, id, intent, name, shortName, icon);
+            return pinToHomeRegacy (context, intent, shortName, icon);
         } else {
             return pinToHomeOreo ( context, id, intent, name, shortName, icon);
         }
     }
 
-    private static boolean pinToHomeRegacy (Context context, String id, Intent intent,
-                                            CharSequence name, CharSequence shortName, int icon) {
+    private static boolean pinToHomeRegacy (Context context, Intent intent,
+                                            CharSequence shortName, int icon) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             if (!checkShortcutPermission(context))
                 return false;
@@ -59,6 +58,7 @@ public final class PinToHomeUtility {
             return false;
 
         ShortcutManager shortcutManager = context.getSystemService(ShortcutManager.class);
+        if (shortcutManager == null) return false;
         if(!shortcutManager.isRequestPinShortcutSupported())
             return false;
 
@@ -85,6 +85,7 @@ public final class PinToHomeUtility {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private static boolean checkShortcutPermission (Context context) {
-        return context.checkSelfPermission(Manifest.permission.INSTALL_SHORTCUT) == PackageManager.PERMISSION_GRANTED;
+        return context.checkSelfPermission(Manifest.permission.INSTALL_SHORTCUT)
+                == PackageManager.PERMISSION_GRANTED;
     }
 }
