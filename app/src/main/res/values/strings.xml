@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">청사식단</string>
     <string name="menu_pin_to_home">홈 화면에 고정</string>
+    <string name="menu_print_image">이미지 프린트</string>
+    <string name="menu_share_image">이미지 공유</string>
     <string name="pin_to_home_error">홈 화면에 아이콘을 등록할 수 없었습니다.</string>
     <string name="menu_clear_caches">캐시 삭제</string>
     <string name="succeed_clear_caches">캐시 삭제가 완료되었습니다.</string>

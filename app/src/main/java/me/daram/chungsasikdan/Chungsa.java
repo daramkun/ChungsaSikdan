@@ -16,12 +16,11 @@ import java.util.regex.Pattern;
 public final class Chungsa {
     public static List<Chungsa> getChungsaList (Context context) throws IOException {
         Pattern chungsaPattern = Pattern.compile("[\t ]*<option value=\"(BD[0-9]+)\" label=\"(.*)\"[ ]*>(.*)</option>");
-        //URL url = new URL("http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do");
 
         List<Chungsa> retList = new ArrayList<>();
 
         String url = "http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do";
-        BufferedReader in = new BufferedReader (PageGetter.getPage(context, url));//new BufferedReader(new InputStreamReader(url.openStream()));
+        BufferedReader in = new BufferedReader (PageGetter.getPageToInputStreamReader (context, url));
         String str;
         while ((str = in.readLine()) != null) {
             Matcher matcher = chungsaPattern.matcher(str);

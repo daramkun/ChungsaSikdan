@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/pin_to_home"
         android:title="@string/menu_pin_to_home" />
+    <item
+        android:id="@+id/print_image"
+        android:title="@string/menu_print_image" />
+    <item
+        android:id="@+id/share_image"
+        android:title="@string/menu_share_image"
+        app:actionProviderClass="android.widget.ShareActionProvider" />
 </menu>

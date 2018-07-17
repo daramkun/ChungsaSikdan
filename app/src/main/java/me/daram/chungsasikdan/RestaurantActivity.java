@@ -1,11 +1,22 @@
 package me.daram.chungsasikdan;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.print.PrintHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,13 +24,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ShareActionProvider;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.github.chrisbanes.photoview.PhotoView;
-import com.squareup.picasso.Picasso;
+//import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +48,7 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
     String chungsaCode;
     List<Restaurant> restaurantList;
     List<String> restaurantNames;
+    Drawable currentDrawable;
 
     @Override
     public void onCreate (Bundle savedInstanceState) {
@@ -83,7 +101,7 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
                                     android.R.layout.simple_list_item_1, restaurantNames);
                             restaurantSpinner.setAdapter(adapter);
 
-                            getRestaurantMenuImageAsync(restaurantList.get(0));
+                            //getRestaurantMenuImageAsync(restaurantList.get(0));
                         }
                     });
                 } catch (IOException e) {
@@ -98,33 +116,30 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
     private void getRestaurantMenuImageAsync (final Restaurant restaurant) {
         final Activity self = this;
         final PhotoView menuImageView = findViewById(R.id.restaurant_menu_photoview);
+        final LoadingDialog loadingDialog = new LoadingDialog (this);
+        loadingDialog.show ();
         @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void> () {
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    //URL menuUrl = new URL(restaurant.getMenuURL());
-                    //final Bitmap menuImage = BitmapFactory.decodeStream(menuUrl.openStream());
-
-                    //runOnUiThread(new Runnable(){
-                    //    @Override
-                    //    public void run() {
-                    //        PhotoView menuImageView = findViewById(R.id.restaurant_menu_photoview);
-                    //        menuImageView.setImageBitmap(menuImage);
-                    //    }
-                    //});
-                    final String url = restaurant.getMenuURL(self);
+	                currentDrawable = restaurant.getMenuImage ( self );
+	                
                     runOnUiThread(new Runnable(){
                         @Override
                         public void run() {
-                            Picasso.get()
-                                    .load(url)
-                                    //.networkPolicy(NetworkPolicy.OFFLINE)
-                                    .error(R.drawable.no_image)
-                                    .into(menuImageView);
+                            menuImageView.setImageDrawable ( currentDrawable );
+                            loadingDialog.dismiss ();
                         }
                     });
                 } catch (IOException e) {
                     e.printStackTrace();
+                    runOnUiThread(new Runnable () {
+                    	@Override
+	                    public void run () {
+                    		menuImageView.setImageResource ( R.drawable.no_image );
+                    		loadingDialog.dismiss ();
+	                    }
+                    });
                 }
                 return null;
             }
@@ -163,11 +178,61 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
                     }
                 }
                 break;
+                
+            case R.id.print_image:
+                {
+                    final PrintHelper printHelper = new PrintHelper (this);
+                    printHelper.setScaleMode ( PrintHelper.SCALE_MODE_FIT );
+                    printHelper.printBitmap ( "청사식단", ( ( BitmapDrawable ) currentDrawable ).getBitmap () );
+                }
+                break;
+                
+            case R.id.share_image:
+                {
+                    if ( ContextCompat.checkSelfPermission ( this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED ) {
+                        ActivityCompat.requestPermissions ( this, new String [] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, 101 );
+                        break;
+                    }
+                    
+                    shareImage ();
+                }
+                break;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+    
+    @Override
+    public void onRequestPermissionsResult ( int requestCode, String [] permissions, int [] grantResults ) {
+        switch ( requestCode ) {
+            case 101:
+            {
+                if ( grantResults.length > 0 && grantResults [ 0 ] == PackageManager.PERMISSION_GRANTED ) {
+                    shareImage ();
+                } else {
+                    Toast.makeText ( this, "식단 이미지를 공유하기 위해서는 외부 저장소에 쓰기와 관련된 권한이 필요합니다.", Toast.LENGTH_LONG ).show ();
+                }
+            }
+            break;
+        }
+    }
+    
+    private Uri copyToExternalContentAndReturnUri () {
+        File file = new File ( String.format ( "%s/%s", Environment.getExternalStorageDirectory (), "ChungsaSikdanShare.jpg" ) );
+        try {
+            OutputStream fileOutputStream = new FileOutputStream ( file );
+            file.createNewFile ();
+            ( ( BitmapDrawable ) currentDrawable ).getBitmap ().compress ( Bitmap.CompressFormat.JPEG, 90, fileOutputStream );
+            fileOutputStream.close ();
+        } catch ( Exception e ) {
+            e.printStackTrace ();
+            return null;
+        }
+        Log.i ( "청사식단", "공유 이미지 경로: " + file.getAbsolutePath () );
+        return Uri.parse ( file.getAbsolutePath () );
     }
 
     private String getChungsaShortName () {
@@ -177,5 +242,13 @@ public class RestaurantActivity extends Activity implements AdapterView.OnItemSe
         if (title.length () <= 4)
             return title;
         return title.substring(0, 4);
+    }
+    
+    private void shareImage () {
+        Intent shareIntent = new Intent ();
+        shareIntent.setAction ( Intent.ACTION_SEND );
+        shareIntent.putExtra ( Intent.EXTRA_STREAM, copyToExternalContentAndReturnUri () );
+        shareIntent.setType ( "image/*" );
+        startActivity ( Intent.createChooser ( shareIntent, "이미지 공유" ) );
     }
 }
