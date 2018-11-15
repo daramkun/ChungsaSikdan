@@ -77,6 +77,7 @@ public final class PageGetter {
     }
 
     private static String MD5 (String str) {
+        if ( str == null || str.length () == 0 ) return "";
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(str.getBytes());

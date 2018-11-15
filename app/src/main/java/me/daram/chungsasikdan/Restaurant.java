@@ -45,7 +45,7 @@ public final class Restaurant {
         if (urlCache != null)
             return urlCache;
         else {
-            Pattern chungsaPattern = Pattern.compile("[\t ]*<img src='(\\/chungsa\\/cmm\\/fms\\/getImage.do[a-zA-Z0-9_&=?.;]+)'[ ]+width=\"([0-9]+)px\"[ ]+height=\"([0-9]+)px\"[ ]+alt=\"(.*)\"[ ]+\\/>");
+            Pattern chungsaPattern = Pattern.compile("[\t ]*<img(.*)src='(\\/chungsa\\/cmm\\/fms\\/getImage.do[a-zA-Z0-9_&=?.;]+)'(.*)\\/>");
             
             BufferedReader in = new BufferedReader(PageGetter.getPageToInputStreamReader (context, String.format ( "http://www.chungsa.go.kr/chungsa/frt/popup/a01/foodMenu.do?searchCode1=REST&selGbdVal=%s&selRestVal=%s", chungsaCode, code )));
             String str;
@@ -54,7 +54,7 @@ public final class Restaurant {
                 if (!matcher.matches())
                     continue;
 	            in.close();
-                return urlCache = String.format("http://www.chungsa.go.kr%s", matcher.group(1));
+                return urlCache = String.format("http://www.chungsa.go.kr%s", matcher.group(2));
             }
             in.close();
 
